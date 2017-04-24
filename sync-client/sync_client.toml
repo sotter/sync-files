@@ -1,0 +1,4 @@
+SynServer = "127.0.0.1:8000"
+SyncRootPath  = "img"
+#远端同步的目录名称
+RemoteSavePath = "img"
