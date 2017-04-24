@@ -23,6 +23,10 @@ func LoadLocalFiles(path string,  ignore IgnoreFunc) (map[string]uint64, error) 
 	files := map[string]uint64{}
 	regulatedPath := filepath.ToSlash(path)
 	loadMd5Sums := func(filePath string, info os.FileInfo, err error) error {
+		if info == nil {
+			return err
+		}
+
 		if !info.IsDir() {
 			p := RelativePath(regulatedPath, filepath.ToSlash(filePath))
 			if !ignore(filePath) {  //只有非过滤的文件才同步

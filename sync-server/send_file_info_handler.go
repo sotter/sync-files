@@ -42,7 +42,7 @@ func SendFileInfoHandler(session *Session, msg *protocol.CommMsg) error{
 	}
 
 	resp := protocol.NewCommMsg(uint16(sync_proto.SYNC_Msg_SyncFileReq), body)
-	session.TcpConn.Write(resp)
+	session.TcpConn.WriteWouldBlock(resp)
 
 	return nil
 }

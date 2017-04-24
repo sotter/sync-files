@@ -3,3 +3,4 @@ img/
 sync-client
 sync-server
 ut
+*.toml
