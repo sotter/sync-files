@@ -1,6 +1,6 @@
 .idea/
 img/
-sync-client
-sync-server
+sync-client/sync-client
+sync-server/sync-server
 ut
 *.toml
