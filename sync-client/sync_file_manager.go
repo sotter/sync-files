@@ -39,7 +39,6 @@ func NewFileManager() *FileManager {
 		ScanFinish : false,
 		fileCnt : 0,
 	}
-
 	for i := 0; i < sessionMapNum; i++ {
 		manager.fileMapGroups[i].fileMap = make(map[string](FileInfo))
 	}
@@ -58,7 +57,10 @@ func (this *FileManager) OnScanNewFile(file_name string, info FileInfo) {
 		//log.Println("fileManager insert : ", file_name)
 		smap.fileMap[file_name] = info
 		atomic.AddInt32(&this.fileCnt, 1)
+	} else {
+		log.Println("warning:OnScanNewFile ", file_name, " already exist!!")
 	}
+
 	smap.rwmutex.Unlock()
 }
 
@@ -75,11 +77,14 @@ func (this *FileManager)OnFileComplete(file_name string) (allFinish bool) {
 		atomic.AddInt32(&this.fileCnt, -1)
 		str := fmt.Sprintf("complete %dms size:%dKB", int(now - info.timestamp),int(info.size/1000))
 		log.Println(sbase.FormatOutput(file_name, str, 60))
+	} else {
+		log.Println("warning:OnFileComplete ", file_name, " is not exist!!")
 	}
 
 	if this.ScanFinish && atomic.AddInt32(&this.fileCnt, 0) == 0 {
 		allFinish = true
 	}
+
 	smap.rwmutex.Unlock()
 
 	return allFinish

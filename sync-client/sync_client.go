@@ -8,6 +8,8 @@ import (
 	"time"
 	"net"
 	"github.com/BurntSushi/toml"
+	"fmt"
+	"os"
 )
 
 type Session struct {
@@ -17,6 +19,7 @@ type Session struct {
 
 var g_root_path = "./"
 var g_remote_path = "./"
+var g_stop = make(chan bool)
 
 func GetRootPath() string {
 	return g_root_path
@@ -136,6 +139,13 @@ func main() {
 
 	g_root_path = Config.SyncRootPath
 	g_remote_path = Config.RemoteSavePath
+
+	_, err = os.Lstat(g_root_path)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	// 1 条控制通道对应16条数据通道
 	g_service_client.RegisterClient("ctl_client", Config.SynServer)
 	for i := 0; i < 16; i++ {
@@ -143,8 +153,15 @@ func main() {
 	}
 
 	//开始比对
-	LoadLocalFiles(g_root_path)
-	select {
+	if err := LoadLocalFiles(g_root_path); err != nil {
+		fmt.Println("LoadLocalFiles Fail:", err.Error())
+		return
+	}
 
+	g_file_manager.ScanFinish = true
+
+	select {
+	case <-g_stop:
+		return ;
 	}
 }

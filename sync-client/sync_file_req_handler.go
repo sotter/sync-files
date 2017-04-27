@@ -26,6 +26,7 @@ func SyncFileReqHandler(service *ServiceClient, msg *protocol.CommMsg) error {
 	relative_name := req.GetFileName()
 	if req.GetNeedSync() == false {
 		log.Print(sbase.FormatOutput(relative_name, "Same", 60))
+		g_file_manager.OnFileComplete(relative_name)
 		return nil
 	}
 

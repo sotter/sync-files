@@ -26,15 +26,23 @@ func LoadLocalFiles(path string) (error) {
 		}
 		if !info.IsDir() {
 			p := base.RelativePath(regulatedPath, filepath.ToSlash(filePath))
-			if !Ignore(info) {
-				//只有非过滤的文件才同步
-				hash_code := base.GetFileHashSum(filePath)
-				if err := SendFileInfo(p, hash_code); err == nil {
-					g_file_manager.OnScanNewFile(g_remote_path + "/" + p, FileInfo{
-						timestamp : base.GetTimeMS(),
-						size : uint32(info.Size()),
-					})
-				}
+			if info.Size() == 0 {
+				log.Println(p, "size is 0, ignore!!!")
+				return nil
+			}
+
+			if Ignore(info) {
+				log.Println(p, "is ignored!!!")
+				return nil
+			}
+
+			//只有非过滤的文件才同步
+			hash_code := base.GetFileHashSum(filePath)
+			if err := SendFileInfo(p, hash_code); err == nil {
+				g_file_manager.OnScanNewFile(g_remote_path + "/" + p, FileInfo{
+					timestamp : base.GetTimeMS(),
+					size : uint32(info.Size()),
+				})
 			}
 		}
 		return nil

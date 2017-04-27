@@ -5,7 +5,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"sync-files/proto"
 	log "github.com/sotter/dovenet/log"
-	"os"
 )
 
 func SyncFileCompleteHandler(service *ServiceClient, msg *protocol.CommMsg) error {
@@ -20,7 +19,7 @@ func SyncFileCompleteHandler(service *ServiceClient, msg *protocol.CommMsg) erro
 
 	if allFinish {
 		log.Println("All files trans complete !!!")
-		os.Exit(0)
+		g_stop <- true
 	}
 	return nil
 }
