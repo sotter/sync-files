@@ -3,20 +3,22 @@ package sync_proto;
 //生成的文件放到当前目录中： protoc --go_out=. *.proto
 
 enum SYNC {
-    Msg_SendFileInfo    = 1;
-    Msg_SyncFileReq     = 2;
-    Msg_SyncFileData    = 3;
+    Msg_SyncFileInfo       = 1;
+    Msg_SyncFileInfoResp   = 2;
+    Msg_SyncFileData       = 3;
+    Msg_SyncFileComplete   = 4;
 }
 
 //client -> Server Type : 0001
-message SendFileInfo {
-    required string file_name = 1;  // 文件名
+message SyncFileInfo {
+    required string file_name = 1;   // 文件名
     required uint64 hash_code = 2;   // 文件的hash值
 }
 
 //server -> client Type : 8002
-message SyncFileReq {
+message SyncFileInfoResp {
     required string file_name = 1;  // 文件名
+    required bool   need_sync = 2;  // 是否需要同步
 }
 
 //client -> client Type : 0002
@@ -26,4 +28,9 @@ message SyncFileData {
     required uint32 total_packs     = 3;   // 分包时的总包数
     required uint32 current_packs   = 4;   // 当前包的编号
     required bytes  data            = 5;   // 文件数据
+}
+
+//告知客户端，文件已经发送完毕了
+message SyncFileComplete {
+    required string file_name       = 1;   // 文件名
 }

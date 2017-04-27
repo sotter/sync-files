@@ -3,10 +3,15 @@ package base
 import (
 	"os"
 	"strings"
-	"path/filepath"
 	"io/ioutil"
 	log "github.com/sotter/dovenet/log"
+	"time"
 )
+
+//获取当前的时间的毫秒时间
+func GetTimeMS() uint64 {
+	return uint64(time.Now().Unix()) / uint64(time.Millisecond)
+}
 
 func GetFileHashSum(file_name string) uint64 {
 	hash := uint64(0)
@@ -19,31 +24,32 @@ func GetFileHashSum(file_name string) uint64 {
 
 type IgnoreFunc func(file string) bool
 
-func LoadLocalFiles(path string,  ignore IgnoreFunc) (map[string]uint64, error) {
-	files := map[string]uint64{}
-	regulatedPath := filepath.ToSlash(path)
-	loadMd5Sums := func(filePath string, info os.FileInfo, err error) error {
-		if info == nil {
-			return err
-		}
+type FileInfoCallBack func(file string, hashCode uint64) bool
 
-		if !info.IsDir() {
-			p := RelativePath(regulatedPath, filepath.ToSlash(filePath))
-			if !ignore(filePath) {  //只有非过滤的文件才同步
-				files[p] = GetFileHashSum(filePath)
-			}
-		}
-		return nil
-	}
-
-	err := filepath.Walk(path, loadMd5Sums)
-	if err != nil {
-		return files, err
-	}
-
-	log.Println("Loaded ", len(files),  " files from ", path)
-	return files, nil
-}
+//func LoadLocalFiles(path string,  ignore IgnoreFunc, info_fn FileInfoCallBack) (map[string]uint64, error) {
+//	files := map[string]uint64{}
+//	regulatedPath := filepath.ToSlash(path)
+//	loadMd5Sums := func(filePath string, info os.FileInfo, err error) error {
+//		if info == nil {
+//			return err
+//		}
+//		if !info.IsDir() {
+//			p := RelativePath(regulatedPath, filepath.ToSlash(filePath))
+//			if !ignore(filePath) {  //只有非过滤的文件才同步
+//				files[p] = GetFileHashSum(filePath)
+//			}
+//		}
+//		return nil
+//	}
+//
+//	err := filepath.Walk(path, loadMd5Sums)
+//	if err != nil {
+//		return files, err
+//	}
+//
+//	log.Println("Loaded ", len(files),  " files from ", path)
+//	return files, nil
+//}
 
 func SaveDataToLocalFile(data []byte, dir string, name string, append bool, file_mode os.FileMode) error {
 	//log.Println("Save Local file size:", len(data), " :", name)

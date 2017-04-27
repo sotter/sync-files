@@ -29,6 +29,7 @@ type ServiceClient struct {
 
 var (
 	g_service_client = NewServiceClient(10 * 1024)
+	g_file_manager = NewFileManager()
 )
 
 //给msg handler使用
@@ -81,8 +82,10 @@ func (this *ServiceClient)RemoveClient(name string, address string) {
 //业务处理函数
 func (this *ServiceClient) OnMessageData(conn *base.TcpConnection, msg protocol.Message) error {
 	recv_msg := msg.(*protocol.CommMsg)
-	if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SyncFileReq) {
+	if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SyncFileInfoResp) {
 		return SyncFileReqHandler(this, recv_msg)
+	} else if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SyncFileComplete){
+		return SyncFileCompleteHandler(this, recv_msg)
 	}
 	return nil
 }
@@ -140,7 +143,7 @@ func main() {
 	}
 
 	//开始比对
-	SendFileInfo()
+	LoadLocalFiles(g_root_path)
 	select {
 
 	}

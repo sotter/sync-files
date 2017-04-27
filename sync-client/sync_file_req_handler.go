@@ -5,6 +5,7 @@ import (
 	log "github.com/sotter/dovenet/log"
 	"sync-files/proto"
 	"github.com/golang/protobuf/proto"
+	sbase "github.com/sotter/dovenet/base"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -15,7 +16,7 @@ const  PACK_SIZE = (1024 * 10)
 
 //收到发送文件的请求
 func SyncFileReqHandler(service *ServiceClient, msg *protocol.CommMsg) error {
-	req := &sync_proto.SyncFileReq{}
+	req := &sync_proto.SyncFileInfoResp{}
 	err := proto.Unmarshal(msg.Body, req)
 	if err != nil {
 		log.Println("SendFileInfo Unmarshal fail:", err.Error())
@@ -23,6 +24,10 @@ func SyncFileReqHandler(service *ServiceClient, msg *protocol.CommMsg) error {
 	}
 
 	relative_name := req.GetFileName()
+	if req.GetNeedSync() == false {
+		log.Print(sbase.FormatOutput(relative_name, "Same", 60))
+		return nil
+	}
 
 	//生成本地目录时，要把远程目录去掉
 	local_file := GetRootPath() + "/" + strings.TrimPrefix(relative_name, g_remote_path + "/")
@@ -55,8 +60,6 @@ func SyncFileReqHandler(service *ServiceClient, msg *protocol.CommMsg) error {
 			CurrentPacks: &current_cnt,
 			FileMode: &mode_perm,
 		}
-
-		log.Println("relative_name:", relative_name)
 
 		if (current_cnt < total_cnt - 1) {
 			data.Data = buf[current_cnt * PACK_SIZE : (current_cnt+1) * PACK_SIZE]

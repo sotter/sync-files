@@ -11,7 +11,7 @@ import (
 
 func SendFileInfoHandler(session *Session, msg *protocol.CommMsg) error{
 	// 比对下本地文件的看是否需要比对
-	req := &sync_proto.SendFileInfo{}
+	req := &sync_proto.SyncFileInfo{}
 	err := proto.Unmarshal(msg.Body, req)
 	if err != nil {
 		log.Println("SendFileInfo Unmarshal fail:", err.Error())
@@ -22,17 +22,18 @@ func SendFileInfoHandler(session *Session, msg *protocol.CommMsg) error{
 	local_hash := base.GetFileHashSum(GetRootPath() + "/" + file_name)
 	remote_hash := req.GetHashCode()
 
-	//fmt.Printf("|%6s|%6s|\n", "foo", "b")
+	need_sync := true
 	if local_hash== remote_hash {
 		log.Print(sbase.FormatOutput(file_name, "Same", 60))
-		return nil
+		need_sync = false
 	}
 
 	log.Print(sbase.FormatOutput(file_name, "Diff", 60))
 
 	//文件不相同，告知客户端发送数据
-	sync_file_req := &sync_proto.SyncFileReq{
+	sync_file_req := &sync_proto.SyncFileInfoResp{
 		FileName : &file_name,
+		NeedSync : &need_sync,
 	}
 
 	body, err := proto.Marshal(sync_file_req)
@@ -41,7 +42,7 @@ func SendFileInfoHandler(session *Session, msg *protocol.CommMsg) error{
 		return err
 	}
 
-	resp := protocol.NewCommMsg(uint16(sync_proto.SYNC_Msg_SyncFileReq), body)
+	resp := protocol.NewCommMsg(uint16(sync_proto.SYNC_Msg_SyncFileInfoResp), body)
 	session.TcpConn.WriteWouldBlock(resp)
 
 	return nil

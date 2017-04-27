@@ -2,5 +2,7 @@
 img/
 sync-client/sync-client
 sync-server/sync-server
+sync-server/sync-files/
 ut
 *.toml
+.DS_Store

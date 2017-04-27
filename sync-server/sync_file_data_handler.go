@@ -35,8 +35,23 @@ func SyncFileDataHandler(session *Session, msg *protocol.CommMsg) error{
 	}
 
 	err = base.SaveDataToLocalFile(file_data.Data, dir, file_name, append, os.FileMode(file_mode))
+	//判定是最后一个包
 	if err == nil && file_data.GetCurrentPacks() + 1 == file_data.GetTotalPacks(){
 		log.Println(sbase.FormatOutput(file_data.GetFileName(), "Complete", 60))
+		//发送已经完成的
+		file_complete := &sync_proto.SyncFileComplete{
+			FileName : file_data.FileName,
+		}
+
+		body, err := proto.Marshal(file_complete)
+		if err != nil {
+			log.Println("sync_file_req Marshal fail:", err.Error())
+			return err
+		}
+
+		resp := protocol.NewCommMsg(uint16(sync_proto.SYNC_Msg_SyncFileComplete), body)
+		//TODO：目前Server没有客户端类型的分开管理，先从数据通道回去；-> 1. 控制通道和数据通道，使用不同的端口； 2. Server端分开管理不同的客户端
+		session.TcpConn.WriteWouldBlock(resp)
 	}
 
 	return nil

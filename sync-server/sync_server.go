@@ -32,7 +32,7 @@ type Session struct {
 //直接使用Session的回调，可以减少一次从TcpConnection层到Session层的查找
 func (this *Session) OnMessageData(conn *base.TcpConnection, msg protocol.Message) error{
 	recv_msg := msg.(*protocol.CommMsg)
-	if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SendFileInfo) {
+	if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SyncFileInfo) {
 		return SendFileInfoHandler(this, recv_msg)
 	} else if recv_msg.Header.MsgType == uint16(sync_proto.SYNC_Msg_SyncFileData){
 		return SyncFileDataHandler(this, recv_msg)

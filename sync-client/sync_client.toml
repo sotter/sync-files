@@ -1,4 +1,4 @@
-SynServer = "23.83.243.93:8000"
-SyncRootPath  = "../../img"
+SynServer = "127.0.0.1:8000"
+SyncRootPath  = "../../img/hmate"
 #远端同步的目录名称
 RemoteSavePath = "img"
