@@ -1,3 +1,5 @@
+#使git ignore支持已经track过的文件
+#git ls-files -z |xargs -0 git update-index --assume-unchanged
 .idea/
 img/
 sync-client/sync-client

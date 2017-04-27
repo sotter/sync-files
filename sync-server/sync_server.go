@@ -1,7 +1,6 @@
 package main
 
 import _ "net/http/pprof"
-
 import (
 	"github.com/sotter/dovenet/base"
 	"github.com/sotter/dovenet/protocol"
